@@ -53,8 +53,8 @@ contract InternalContract is PluginClient, Ownable {
   function showPrice() public view returns(uint256){
     return currentValue;
   }
-  //_fsysm should be the name of your source token from which you want the comparison 
-  //_tsysm should be the name of your destinaiton token to which you need the comparison
+  //_fsyms should be the name of your source token from which you want the comparison 
+  //_tsyms should be the name of your destinaiton token to which you need the comparison
   //_jobID should be tagged in Oracle
   //_oracle should be fulfiled with your plugin node address
 
