@@ -99,7 +99,6 @@ contract Aggregator is AggregatorInterface, PluginClient, Ownable {
    */
   function requestData(address _caller)
     external
-    ensureAuthorizedRequester()
   {
 
     //Check the total Credits available for the user to perform the transaction
