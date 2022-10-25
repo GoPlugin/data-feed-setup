@@ -10,6 +10,7 @@ contract InternalContract is PluginClient, Ownable {
   address public oracle;  // "0x97A6d407f4CD30936679d0a28A3bc2A7F13a2185"
   string  public jobId;   // "32abe898ea834e328ebeb714c5a0991d"
   uint256 public currentValue;
+  uint256 public latestTimestamp;
 
   //struct to keep track of PLI Deposits
   struct PLIDatabase{
@@ -54,6 +55,7 @@ contract InternalContract is PluginClient, Ownable {
   function showPrice() public view returns(uint256){
     return currentValue;
   }
+
   //_fsyms should be the name of your source token from which you want the comparison 
   //_tsyms should be the name of your destinaiton token to which you need the comparison
   //_jobID should be tagged in Oracle
@@ -74,6 +76,7 @@ contract InternalContract is PluginClient, Ownable {
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
     requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
+    latestTimestamp = now;
     emit requestCreated(_caller, stringToBytes32(jobId), requestId);
   }
 
@@ -87,6 +90,7 @@ contract InternalContract is PluginClient, Ownable {
     req.add("_fsyms","XDC");
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
+    latestTimestamp = now;
     requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
     emit requestCreatedTest(stringToBytes32(jobId), requestId);
   }
