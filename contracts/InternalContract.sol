@@ -27,6 +27,7 @@ contract InternalContract is PluginClient, Ownable {
 
   //Initialize event requestCreated   
   event requestCreated(address indexed requester,bytes32 indexed jobId, bytes32 indexed requestId);
+  event requestCreatedTest(bytes32 indexed jobId, bytes32 indexed requestId);
 
   //Constructor to pass Pli Token Address during deployment
   constructor(address _pli,address _oracle,string memory _jobid) public Ownable() {
@@ -71,7 +72,7 @@ contract InternalContract is PluginClient, Ownable {
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
     req.add("_fsyms","XDC");
     req.add("_tsyms","USDT");
-    req.addInt("times", 100);
+    req.addInt("times", 10000);
     requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
     emit requestCreated(_caller, stringToBytes32(jobId), requestId);
   }
@@ -85,9 +86,9 @@ contract InternalContract is PluginClient, Ownable {
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
     req.add("_fsyms","XDC");
     req.add("_tsyms","USDT");
-    req.addInt("times", 100);
+    req.addInt("times", 10000);
     requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
-    emit requestCreated(_caller, stringToBytes32(jobId), requestId);
+    emit requestCreatedTest(stringToBytes32(jobId), requestId);
   }
 
 
