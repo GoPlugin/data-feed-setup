@@ -4,13 +4,17 @@ import "@goplugin/contracts/src/v0.4/vendor/Ownable.sol";
 import "@goplugin/contracts/src/v0.4/PluginClient.sol";
 
 contract InternalContract is PluginClient, Ownable {
-    
+  
+  address private constant REGISTRARADDRESS=address(0xeF0eef30A645Aa9c39D4383321cCc0DF906ff12c); //DO NOT REMOVE THIS
+  uint256 private constant REGISTRARFEE = 0.0001 * 10**18;   //DO NOT REMOVE THIS
   //Initialize Oracle Payment     
-  uint256 constant private ORACLE_PAYMENT = 0.01 * 10**18;
+  uint256 constant private ORACLE_PAYMENT = 0.1 * 10**18;
   address public oracle;  // "0x97A6d407f4CD30936679d0a28A3bc2A7F13a2185"
   string  public jobId;   // "32abe898ea834e328ebeb714c5a0991d"
   uint256 public currentValue;
   uint256 public latestTimestamp;
+
+  uint256 public oraclefee;
 
   //struct to keep track of PLI Deposits
   struct PLIDatabase{
@@ -56,6 +60,15 @@ contract InternalContract is PluginClient, Ownable {
     return currentValue;
   }
 
+  function getOracleFee(address _callee) internal returns(uint256){
+    if((REGISTRARADDRESS==_callee)){
+      oraclefee = REGISTRARFEE;
+    }else{
+      oraclefee = ORACLE_PAYMENT;
+    }
+    return oraclefee;
+  }
+
   //_fsyms should be the name of your source token from which you want the comparison 
   //_tsyms should be the name of your destinaiton token to which you need the comparison
   //_jobID should be tagged in Oracle
@@ -65,18 +78,19 @@ contract InternalContract is PluginClient, Ownable {
     public
     returns (bytes32 requestId)
   {
+    uint256 _fee = getOracleFee(_caller);
     //Check the total Credits available for the user to perform the transaction
     uint256 _a_totalCredits = plidbs[_caller].totalcredits;
-    require(_a_totalCredits>ORACLE_PAYMENT,"NO_SUFFICIENT_CREDITS");
-    plidbs[_caller].totalcredits = _a_totalCredits - ORACLE_PAYMENT;
+    require(_a_totalCredits>_fee,"NO_SUFFICIENT_CREDITS");
+    plidbs[_caller].totalcredits = _a_totalCredits - _fee;
     
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
     req.add("_fsyms","XDC");
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
-    requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
-    latestTimestamp = now;
+    requestId = sendPluginRequestTo(oracle, req, _fee);
+    latestTimestamp = block.timestamp;
     emit requestCreated(_caller, stringToBytes32(jobId), requestId);
   }
 
@@ -85,13 +99,15 @@ contract InternalContract is PluginClient, Ownable {
     onlyOwner
     returns (bytes32 requestId)
   {    
+    uint256 _fee = 0.001 * 10**18;
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
     req.add("_fsyms","XDC");
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
-    latestTimestamp = now;
-    requestId = sendPluginRequestTo(oracle, req, ORACLE_PAYMENT);
+
+    latestTimestamp = block.timestamp;
+    requestId = sendPluginRequestTo(oracle, req, _fee);
     emit requestCreatedTest(stringToBytes32(jobId), requestId);
   }
 
